@@ -1,0 +1,2467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NextGen AI — Field-First QR Request System for Construction</title>
+  <meta name="description" content="Crews scan a QR code and submit maintenance requests, transport requests, and inspections in under 60 seconds. No app required. Everything lands in one queue for the office and shop.">
+  <meta property="og:title" content="NextGen AI — Field-First QR Workflows for Construction">
+  <meta property="og:description" content="One scan. Clean request. Shop notified. Built for excavation, underground utilities, concrete, and commercial construction.">
+  <meta property="og:image" content="https://michaelai1.github.io/toolguard-landing/og-image.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* =====================
+       DESIGN TOKENS
+    ===================== */
+    :root {
+      --gold:       #E8A020;
+      --gold-dim:   #C9952A;
+      --gold-glow:  rgba(232, 160, 32, 0.18);
+      --gold-glow2: rgba(232, 160, 32, 0.06);
+      --green:      #22C55E;
+      --green-dim:  #1D9E75;
+      --green-glow: rgba(34, 197, 94, 0.15);
+      --red:        #EF4444;
+      --bg:         #080D18;
+      --bg2:        #0C1220;
+      --surface:    #111827;
+      --surface2:   #1A2336;
+      --surface3:   #243048;
+      --border:     rgba(255,255,255,0.07);
+      --border2:    rgba(255,255,255,0.12);
+      --text:       #F8FAFC;
+      --text2:      #CBD5E1;
+      --muted:      #64748B;
+      --muted2:     #94A3B8;
+      --r:          10px;
+      --r2:         16px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+    img { display: block; max-width: 100%; }
+    a { text-decoration: none; color: inherit; }
+
+    /* =====================
+       TYPOGRAPHY HELPERS
+    ===================== */
+    .section-eyebrow {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+    }
+    .section-headline {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+    .section-sub {
+      font-size: 1.05rem;
+      color: var(--text2);
+      max-width: 52rem;
+      line-height: 1.7;
+    }
+
+    /* =====================
+       NOISE TEXTURE OVERLAY
+    ===================== */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* =====================
+       NAV
+    ===================== */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 999;
+      padding: 1rem 0;
+      transition: background 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s;
+      border-bottom: 1px solid transparent;
+    }
+    .nav.nav--scrolled {
+      background: rgba(8, 13, 24, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom-color: var(--border);
+    }
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: 0.02em;
+    }
+    .nav-brand-ng { color: var(--gold); }
+    .nav-links { display: flex; align-items: center; gap: 2rem; }
+    .nav-link {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted2);
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--text); }
+    .nav-cta {
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.5rem 1.25rem;
+      background: var(--gold);
+      color: #000;
+      border-radius: 6px;
+      transition: background 0.2s, transform 0.15s;
+      letter-spacing: 0.01em;
+    }
+    .nav-cta:hover { background: #ffb733; transform: translateY(-1px); }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+    }
+
+    /* =====================
+       HERO
+    ===================== */
+    .hero {
+      position: relative;
+      padding: 10rem 0 6rem;
+      overflow: hidden;
+    }
+    /* grid pattern */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(232,160,32,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,160,32,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black 30%, transparent 100%);
+      pointer-events: none;
+    }
+    /* gold glow orb */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: -200px; left: 50%; transform: translateX(-50%);
+      width: 900px; height: 600px;
+      background: radial-gradient(ellipse at center, rgba(232,160,32,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: rgba(232,160,32,0.08);
+      border: 1px solid rgba(232,160,32,0.2);
+      border-radius: 100px;
+      padding: 0.3rem 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .hero-badge::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+    .hero-headline {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(2.8rem, 5.5vw, 4.2rem);
+      line-height: 1.0;
+      letter-spacing: -0.015em;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+    .hero-tagline {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text2);
+      margin-bottom: 1.1rem;
+      line-height: 1.4;
+    }
+    .hero-headline em {
+      font-style: normal;
+      color: var(--gold);
+    }
+    .hero-sub {
+      font-size: 1.1rem;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: 2.25rem;
+      max-width: 30rem;
+    }
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 0.8rem 1.75rem;
+      background: var(--gold);
+      color: #000;
+      border-radius: 8px;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      letter-spacing: 0.01em;
+    }
+    .btn-primary:hover {
+      background: #ffb733;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(232,160,32,0.35);
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.8rem 1.5rem;
+      color: var(--text2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+    .btn-secondary:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.25);
+      background: var(--surface);
+    }
+    .hero-trust {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 1.75rem;
+      font-size: 0.8rem;
+      color: var(--muted2);
+    }
+    .hero-trust-sep { color: var(--muted); }
+
+    /* Hero Showcase */
+    .hero-showcase {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    .hero-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      overflow-x: auto;
+    }
+    .hero-tab {
+      flex: 1;
+      min-width: 80px;
+      padding: 0.75rem 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted2);
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+      font-family: 'Outfit', sans-serif;
+    }
+    .hero-tab.is-active { color: var(--gold); border-bottom-color: var(--gold); }
+    .hero-tab:hover:not(.is-active) { color: var(--text2); }
+    .hero-panel { display: none; padding: 1.5rem; }
+    .hero-panel.is-active { display: block; }
+    .hero-mock-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    .hero-mock-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--green);
+      background: var(--green-glow);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+    }
+    .hero-mock-id { font-size: 0.75rem; color: var(--muted2); }
+    .hero-mock-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.75rem; }
+    .hero-mock-checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+    }
+    .hero-mock-checklist li {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text2);
+    }
+    .hero-mock-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--green-glow);
+      border: 1px solid var(--green-dim);
+      flex-shrink: 0;
+    }
+    .hero-mock-check::after { content: '✓'; font-size: 10px; color: var(--green); font-weight: 700; }
+    .hero-mock-check--fail { background: rgba(239,68,68,0.1); border-color: var(--red); }
+    .hero-mock-check--fail::after { content: '!'; color: var(--red); }
+    .hero-mock-footer {
+      font-size: 0.75rem;
+      color: var(--muted2);
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+    .hero-panel-bullets {
+      list-style: none;
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-size: 0.82rem;
+      color: var(--text2);
+    }
+    .hero-panel-bullets li::before { content: '→ '; color: var(--gold); font-weight: 700; }
+    .hero-mock--dispatch .hero-mock-map { margin-bottom: 0.75rem; }
+    .hero-mock--dispatch .hero-mock-map svg { width: 100%; border-radius: 6px; }
+    .hero-mock-dispatch-list { display: flex; flex-direction: column; gap: 0.4rem; }
+    .hero-mock-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--text2);
+      padding: 0.5rem 0.65rem;
+      background: var(--bg2);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .hero-mock-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--green);
+      background: var(--green-glow);
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+    }
+    .hero-mock-tag--muted { color: var(--muted2); background: var(--surface2); }
+    .hero-mock-roi-label { font-size: 0.75rem; color: var(--muted2); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+    .hero-mock-roi-total {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+    }
+    .hero-mock-roi-split { display: flex; flex-direction: column; gap: 0.4rem; }
+    .hero-mock-roi-split > div {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      padding: 0.4rem 0.5rem;
+      background: var(--bg2);
+      border-radius: 5px;
+      border: 1px solid var(--border);
+    }
+    .hero-mock-roi-k { color: var(--muted2); }
+    .hero-mock-roi-v { font-weight: 700; color: var(--gold); }
+    .hero-mock-roi-foot { font-size: 0.72rem; color: var(--muted); margin-top: 0.75rem; }
+    .hero-mock--compliance .hero-mock-shield { text-align: center; padding: 0.5rem 0; }
+    .hero-mock--compliance .hero-mock-shield svg { width: 40px; height: 40px; color: var(--gold); margin: 0 auto 0.5rem; }
+    .hero-mock-comp-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem; }
+    .hero-mock-comp-meta { font-size: 0.8rem; color: var(--green); margin-bottom: 0.75rem; }
+    .hero-mock-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .hero-mock-chip {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--muted2);
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .hero-headline { font-size: 2.8rem; }
+    }
+
+    /* =====================
+       STATS BAR
+    ===================== */
+    .stats-bar {
+      padding: 2.5rem 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .stat-item {
+      text-align: center;
+      padding: 0.5rem;
+    }
+    .stat-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.6rem;
+      font-weight: 900;
+      color: var(--gold);
+      line-height: 1;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.3rem;
+    }
+    .stat-label { font-size: 0.82rem; color: var(--muted2); line-height: 1.4; }
+    @media (max-width: 640px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem 1rem; }
+    }
+
+    /* =====================
+       HOW IT WORKS
+    ===================== */
+    .how-it-works {
+      padding: 6rem 0;
+    }
+    .section-header { margin-bottom: 3.5rem; }
+    .how-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5px;
+      background: var(--border);
+      border-radius: var(--r2);
+      overflow: hidden;
+    }
+    .how-step {
+      background: var(--bg2);
+      padding: 2.5rem 2rem;
+      position: relative;
+    }
+    .how-step-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 5rem;
+      font-weight: 900;
+      line-height: 1;
+      color: rgba(232,160,32,0.6);
+      margin-bottom: 1rem;
+      letter-spacing: -0.04em;
+    }
+    .how-step-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 0.6rem;
+      letter-spacing: 0.01em;
+    }
+    .how-step-body { font-size: 0.9rem; color: var(--text2); line-height: 1.6; }
+    .how-step-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      background: var(--gold-glow2);
+      border: 1px solid rgba(232,160,32,0.15);
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 768px) {
+      .how-steps { grid-template-columns: 1fr; }
+    }
+
+    /* =====================
+       ROI CALCULATOR
+    ===================== */
+    .roi-section {
+      padding: 6rem 0;
+      background: var(--bg2);
+    }
+    .roi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    .roi-inputs-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--r2);
+      padding: 2rem;
+    }
+    .roi-inputs-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted2);
+      margin-bottom: 1.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .slider-group { margin-bottom: 1.75rem; }
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text2);
+      margin-bottom: 0.6rem;
+    }
+    .slider-val-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+    .slider-currency { font-size: 0.8rem; color: var(--muted2); }
+    .number-input {
+      width: 70px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      color: var(--gold);
+      font-size: 0.9rem;
+      font-weight: 700;
+      font-family: 'Barlow Condensed', sans-serif;
+      padding: 0.3rem 0.5rem;
+      text-align: right;
+    }
+    .number-input:focus { outline: none; border-color: var(--gold); }
+    .slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: var(--surface3);
+      border-radius: 4px;
+      outline: none;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--gold);
+      cursor: pointer;
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 3px rgba(232,160,32,0.2);
+      transition: box-shadow 0.2s;
+    }
+    .slider::-webkit-slider-thumb:hover { box-shadow: 0 0 0 5px rgba(232,160,32,0.3); }
+    .slider::-moz-range-thumb {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--gold);
+      cursor: pointer;
+      border: 2px solid var(--bg);
+    }
+
+    .roi-result-card {
+      background: var(--surface);
+      border: 1px solid rgba(232,160,32,0.2);
+      border-radius: var(--r2);
+      padding: 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .roi-result-card::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(232,160,32,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .roi-kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted2);
+      margin-bottom: 0.5rem;
+    }
+    .roi-total {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(3rem, 6vw, 4.5rem);
+      font-weight: 900;
+      color: var(--gold);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.25rem;
+    }
+    .roi-total-label {
+      font-size: 0.8rem;
+      color: var(--muted2);
+      margin-bottom: 2rem;
+    }
+    .roi-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .roi-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg2);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .roi-line-left { display: flex; flex-direction: column; gap: 0.15rem; }
+    .roi-line-name { font-size: 0.85rem; font-weight: 600; }
+    .roi-line-hint { font-size: 0.72rem; color: var(--muted); }
+    .roi-line-val {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .roi-gold { color: var(--gold); }
+    .roi-green { color: var(--green); }
+    .roi-note {
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.5;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .roi-disclaimer {
+      font-size: 0.62rem;
+      color: var(--muted);
+      line-height: 1.45;
+      margin-top: 0.75rem;
+      opacity: 0.92;
+    }
+    .roi-disclaimer-section {
+      margin-top: 0.65rem;
+      max-width: 44rem;
+    }
+
+    /* =====================
+       WORKFLOW CALCULATORS
+    ===================== */
+    .workflow-calc {
+      padding: 6rem 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .wcalc-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border2);
+      margin-bottom: 2.5rem;
+    }
+    .wcalc-tab {
+      padding: 0.85rem 1.75rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: 'Outfit', sans-serif;
+      color: var(--muted2);
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+    .wcalc-tab.is-active { color: var(--gold); border-bottom-color: var(--gold); }
+    .wcalc-tab:hover:not(.is-active) { color: var(--text2); }
+    .wcalc-panel { display: none; }
+    .wcalc-panel.is-active { display: block; }
+    .wcalc-description {
+      font-size: 0.9rem;
+      color: var(--text2);
+      line-height: 1.65;
+      margin-bottom: 2rem;
+      padding: 1rem 1.25rem;
+      background: var(--bg2);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 6px 6px 0;
+    }
+    .wcalc-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+    .wcalc-breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0.9rem;
+      background: var(--bg2);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-size: 0.83rem;
+    }
+    .wcalc-breakdown-label { color: var(--muted2); }
+    .wcalc-breakdown-val { font-weight: 700; color: var(--gold); font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; }
+    @media (max-width: 768px) {
+      .wcalc-tabs { overflow-x: auto; }
+      .wcalc-tab  { padding: 0.75rem 1.1rem; font-size: 0.8rem; }
+    }
+
+    .roi-workbooks { margin-top: 4rem; }
+    .roi-workbooks-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted2);
+      margin-bottom: 0.5rem;
+    }
+    .roi-workbooks-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .roi-workbooks-sub { font-size: 0.9rem; color: var(--text2); margin-bottom: 2rem; }
+    .roi-workbooks-sub a { color: var(--gold); text-decoration: underline; text-decoration-color: rgba(232,160,32,0.3); }
+    .workbooks-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .workbook-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.6rem;
+      padding: 1.5rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+    }
+    .workbook-card:hover {
+      border-color: var(--gold-dim);
+      background: rgba(232,160,32,0.04);
+      transform: translateY(-3px);
+    }
+    .workbook-card svg { width: 26px; height: 26px; color: var(--gold); }
+    .workbook-card-name { font-weight: 700; font-size: 0.9rem; }
+    .workbook-card-action {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    @media (max-width: 900px) {
+      .roi-grid { grid-template-columns: 1fr; }
+      .workbooks-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* =====================
+       ONE-SCAN LOOP
+    ===================== */
+    .one-scan {
+      padding: 6rem 0;
+    }
+    .one-scan-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+      margin-bottom: 2rem;
+    }
+    .one-scan-card {
+      padding: 2rem;
+      border-radius: var(--r2);
+      border: 1px solid var(--border2);
+      background: var(--surface);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .one-scan-card:hover { transform: translateY(-3px); border-color: rgba(232,160,32,0.25); }
+    .one-scan-role {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+    }
+    .one-scan-card h3 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 0.6rem;
+    }
+    .one-scan-card p { font-size: 0.9rem; color: var(--text2); line-height: 1.6; }
+    .one-scan-note {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text2);
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 1.1rem 1.5rem;
+    }
+    .one-scan-note strong { color: var(--gold); }
+    @media (max-width: 768px) { .one-scan-cards { grid-template-columns: 1fr; } }
+
+    /* =====================
+       DEMOS
+    ===================== */
+    .demos {
+      padding: 6rem 0;
+      background: var(--bg2);
+    }
+    .demos-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      margin-top: 3rem;
+      max-width: 860px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .demo-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--r2);
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    .demo-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(232,160,32,0.25);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    }
+    .demo-icon-wrap {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      background: var(--gold-glow);
+      border: 1px solid rgba(232,160,32,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.1rem;
+    }
+    .demo-icon-wrap svg { width: 22px; height: 22px; color: var(--gold); }
+    .demo-card-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 0.3rem;
+    }
+    .demo-card-sub { font-size: 0.82rem; color: var(--muted2); margin-bottom: 1.1rem; }
+    .demo-checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1.5rem;
+      flex: 1;
+    }
+    .demo-checklist li {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.83rem;
+      color: var(--text2);
+    }
+    .demo-checklist li::before {
+      content: '✓';
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--green);
+      background: var(--green-glow);
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .demo-btn {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 0.65rem 1rem;
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      color: var(--text);
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .demo-btn:hover { background: var(--gold); border-color: var(--gold); color: #000; }
+    @media (max-width: 900px) { .demos-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .demos-grid { grid-template-columns: 1fr; } }
+
+    /* =====================
+       COMPARISON TABLE
+    ===================== */
+    .comparison {
+      padding: 6rem 0;
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 3rem;
+      background: var(--surface);
+      border-radius: var(--r2);
+      overflow: hidden;
+      border: 1px solid var(--border2);
+    }
+    .comparison-table th {
+      padding: 1.1rem 1.5rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-align: left;
+    }
+    .comparison-table th:first-child { color: var(--muted2); }
+    .comparison-table th:nth-child(2) {
+      background: var(--surface2);
+      color: var(--muted2);
+      text-align: center;
+    }
+    .comparison-table th:nth-child(3) {
+      background: rgba(232,160,32,0.08);
+      color: var(--gold);
+      text-align: center;
+      border-left: 1px solid rgba(232,160,32,0.2);
+    }
+    .comparison-table td {
+      padding: 0.9rem 1.5rem;
+      font-size: 0.88rem;
+      border-top: 1px solid var(--border);
+    }
+    .comparison-table td:first-child { color: var(--text2); font-weight: 500; }
+    .comparison-table td:nth-child(2) { text-align: center; background: var(--bg2); color: var(--muted); }
+    .comparison-table td:nth-child(3) {
+      text-align: center;
+      background: rgba(232,160,32,0.03);
+      border-left: 1px solid rgba(232,160,32,0.12);
+      font-weight: 600;
+      color: var(--text);
+    }
+    .comp-x { color: var(--red); font-weight: 700; }
+    .comp-check { color: var(--green); font-weight: 700; }
+    @media (max-width: 640px) {
+      .comparison-table { font-size: 0.8rem; }
+      .comparison-table th, .comparison-table td { padding: 0.7rem 0.75rem; }
+    }
+
+    /* =====================
+       PHONE / TEXT DEMO
+    ===================== */
+    .phone-section {
+      padding: 6rem 0;
+      background: var(--bg2);
+    }
+    .phone-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+    .phone-text-eyebrow { margin-bottom: 0.75rem; }
+    .phone-text h2 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 900;
+      line-height: 1.05;
+      margin-bottom: 1rem;
+    }
+    .phone-text h2 em { font-style: normal; color: var(--gold); }
+    .phone-text p { font-size: 1rem; color: var(--text2); line-height: 1.7; margin-bottom: 1.5rem; }
+    /* iPhone mockup */
+    .iphone-wrap {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+    .iphone-glow {
+      position: absolute;
+      bottom: -60px;
+      width: 260px; height: 260px;
+      background: radial-gradient(circle, rgba(34,197,94,0.12) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .iphone {
+      width: 240px;
+      background: #1a1a1c;
+      border-radius: 38px;
+      border: 3px solid #3a3a3c;
+      box-shadow:
+        0 40px 100px rgba(0,0,0,0.7),
+        inset 0 0 0 1px rgba(255,255,255,0.05);
+      overflow: hidden;
+      position: relative;
+    }
+    .iphone-notch {
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 100px; height: 28px;
+      background: #1a1a1c;
+      border-radius: 0 0 16px 16px;
+      z-index: 10;
+    }
+    .iphone-screen {
+      background: #000;
+      min-height: 460px;
+      display: flex;
+      flex-direction: column;
+      padding: 40px 0 0;
+    }
+    .iphone-statusbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1rem;
+      font-size: 0.65rem;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .iphone-statusbar-time { font-weight: 700; }
+    .messages-area {
+      flex: 1;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      overflow: hidden;
+    }
+    .msg { display: flex; }
+    .msg.user { justify-content: flex-end; }
+    .msg.bot { justify-content: flex-start; }
+    .bubble {
+      max-width: 80%;
+      padding: 0.4rem 0.7rem;
+      border-radius: 14px;
+      font-size: 0.7rem;
+      line-height: 1.4;
+    }
+    .msg.user .bubble { background: var(--green-dim); color: #fff; border-bottom-right-radius: 4px; }
+    .msg.bot .bubble { background: #2c2c2e; color: #f0f0f0; border-bottom-left-radius: 4px; }
+    .typing-bubble { background: #2c2c2e; padding: 0.5rem 0.7rem; }
+    .typing-dot {
+      display: inline-block;
+      width: 5px; height: 5px;
+      background: #888;
+      border-radius: 50%;
+      margin: 0 1.5px;
+      animation: typing 1.2s ease-in-out infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing { 0%,80%,100%{transform:scale(1);opacity:0.5} 40%{transform:scale(1.3);opacity:1} }
+
+    @media (max-width: 768px) {
+      .phone-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .iphone-wrap { order: -1; }
+    }
+
+    /* =====================
+       CTA BANNER
+    ===================== */
+    .cta-banner {
+      padding: 7rem 0;
+      position: relative;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .cta-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(232,160,32,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,160,32,0.05) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 70% 80% at 50% 50%, black 20%, transparent 100%);
+      pointer-events: none;
+    }
+    .cta-banner::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 700px; height: 400px;
+      background: radial-gradient(ellipse at center, rgba(232,160,32,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-inner {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      max-width: 640px;
+      margin: 0 auto;
+      background: rgba(17,24,39,0.7);
+      border: 1px solid rgba(232,160,32,0.2);
+      border-radius: 20px;
+      padding: 3.5rem 3rem;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 32px 80px rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .cta-inner h2 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(2rem, 4.5vw, 3rem);
+      font-weight: 900;
+      line-height: 1.05;
+      margin-bottom: 1rem;
+    }
+    .cta-inner h2 em { font-style: normal; color: var(--gold); }
+    .cta-inner p { font-size: 0.975rem; color: var(--text2); margin-bottom: 2rem; line-height: 1.7; }
+    .cta-proof {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: rgba(232,160,32,0.08);
+      border: 1px solid rgba(232,160,32,0.18);
+      border-radius: 100px;
+      padding: 0.3rem 0.9rem;
+      margin-bottom: 1.75rem;
+    }
+    .cta-proof::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .cta-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .cta-phone {
+      font-size: 0.85rem;
+      color: var(--muted2);
+      margin-top: 1rem;
+    }
+    .cta-phone a { color: var(--gold); font-weight: 600; }
+
+    /* =====================
+       FOOTER
+    ===================== */
+    .footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 3rem 0 2rem;
+    }
+    .footer-inner {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 2.5rem;
+    }
+    .footer-brand {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.02em;
+    }
+    .footer-desc { font-size: 0.85rem; color: var(--muted2); line-height: 1.6; max-width: 22rem; margin-bottom: 1rem; }
+    .footer-contact { font-size: 0.85rem; color: var(--muted2); }
+    .footer-contact a { color: var(--gold); }
+    .footer-col-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted2);
+      margin-bottom: 1rem;
+    }
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+    .footer-links a { font-size: 0.85rem; color: var(--text2); transition: color 0.2s; }
+    .footer-links a:hover { color: var(--gold); }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    @media (max-width: 768px) {
+      .footer-inner { grid-template-columns: 1fr; gap: 2rem; }
+      .footer-bottom { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+
+    /* =====================
+       MISC
+    ===================== */
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
+    }
+
+    /* =====================
+       MOBILE RESPONSIVE
+    ===================== */
+    @media (max-width: 768px) {
+      /* Sections */
+      .hero          { padding: 7rem 0 3.5rem; }
+      .how-it-works,
+      .roi-section,
+      .one-scan,
+      .demos,
+      .comparison,
+      .phone-section,
+      .cta-banner    { padding: 3.5rem 0; }
+
+      /* Hero */
+      .hero-grid     { grid-template-columns: 1fr; gap: 2.5rem; }
+      .hero-headline { font-size: 2.4rem; }
+      .hero-sub      { font-size: 1rem; max-width: 100%; }
+      .hero-actions  { flex-direction: column; align-items: flex-start; }
+      .btn-primary,
+      .btn-secondary { width: 100%; justify-content: center; }
+      .hero-trust    { flex-wrap: wrap; gap: 0.4rem; font-size: 0.75rem; }
+
+      /* Hero showcase */
+      .hero-showcase { border-radius: 12px; }
+      .hero-tab      { font-size: 0.72rem; padding: 0.65rem 0.4rem; }
+      .hero-panel    { padding: 1.1rem; }
+      .hero-mock-title { font-size: 0.85rem; }
+      .hero-mock-checklist { font-size: 0.8rem; }
+      .hero-panel-bullets  { font-size: 0.78rem; }
+
+      /* Stats */
+      .stats-grid    { grid-template-columns: repeat(2, 1fr); gap: 1.25rem 0.75rem; }
+      .stat-num      { font-size: 2rem; }
+
+      /* How it works */
+      .how-steps     { grid-template-columns: 1fr; }
+      .how-step      { padding: 1.75rem 1.25rem; }
+      .how-step-num  { font-size: 3.5rem; }
+
+      /* ROI */
+      .roi-grid      { grid-template-columns: 1fr; gap: 1.25rem; }
+      .roi-inputs-card,
+      .roi-result-card { padding: 1.5rem 1.25rem; }
+      .roi-result-card { order: -1; }
+      .roi-total     { font-size: 2.5rem; }
+
+      /* Section headers */
+      .section-headline { font-size: 1.9rem; }
+      .section-sub      { font-size: 0.95rem; }
+      .section-header   { margin-bottom: 2rem; }
+
+      /* Demos */
+      .demos-grid    { grid-template-columns: 1fr; }
+
+      /* Phone section */
+      .phone-grid    { grid-template-columns: 1fr; gap: 2.5rem; }
+      .iphone-wrap   { order: -1; }
+      .iphone        { width: 200px; }
+
+      /* CTA */
+      .cta-inner     { padding: 2.25rem 1.5rem; }
+      .cta-inner h2  { font-size: 1.75rem; }
+      .cta-actions   { flex-direction: column; align-items: center; }
+      .cta-actions .btn-primary,
+      .cta-actions .btn-secondary { width: 100%; max-width: 320px; justify-content: center; }
+
+      /* Footer */
+      .footer-inner  { grid-template-columns: 1fr; gap: 1.75rem; }
+      .footer-bottom { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+
+    @media (max-width: 480px) {
+      .container     { padding: 0 1rem; }
+      .hero          { padding: 6rem 0 3rem; }
+      .hero-headline { font-size: 2rem; }
+      .stat-num      { font-size: 1.75rem; }
+      .section-headline { font-size: 1.65rem; }
+      .roi-total     { font-size: 2.2rem; }
+      .hero-tab      { font-size: 0.68rem; padding: 0.6rem 0.3rem; min-width: 60px; }
+      .demos-grid    { grid-template-columns: 1fr; }
+    }
+
+    /* =====================
+       SCROLL PROGRESS BAR
+    ===================== */
+    .scroll-progress {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold), #ffb733);
+      z-index: 1001;
+      pointer-events: none;
+    }
+
+    /* =====================
+       SCROLL REVEAL
+    ===================== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s cubic-bezier(0.16,1,0.3,1), transform 0.65s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-d1 { transition-delay: 0.07s; }
+    .reveal-d2 { transition-delay: 0.14s; }
+    .reveal-d3 { transition-delay: 0.21s; }
+    .reveal-d4 { transition-delay: 0.28s; }
+    .reveal-d5 { transition-delay: 0.35s; }
+    .reveal-d6 { transition-delay: 0.42s; }
+
+    /* =====================
+       HERO HEADLINE SHIMMER
+    ===================== */
+    .hero-headline em {
+      background: linear-gradient(90deg, var(--gold), #ffd57e, var(--gold-dim), var(--gold), #ffd57e);
+      background-size: 300% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: var(--gold);
+      animation: gold-shimmer 4s linear infinite;
+    }
+    @keyframes gold-shimmer {
+      0%   { background-position: 0% center; }
+      100% { background-position: 300% center; }
+    }
+
+    /* =====================
+       MOBILE NAV
+    ===================== */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 34px;
+      height: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+    .nav-hamburger span {
+      display: block;
+      height: 2px;
+      background: var(--text2);
+      border-radius: 2px;
+      transition: transform 0.25s, opacity 0.2s, width 0.2s;
+    }
+    .nav-hamburger span:nth-child(3) { width: 70%; }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(10px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-10px) rotate(-45deg); width: 100%; }
+    @media (max-width: 768px) {
+      .nav-hamburger { display: flex; }
+    }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 65px; left: 0; right: 0;
+      background: rgba(8,13,24,0.97);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      z-index: 997;
+      padding: 0.5rem 1.5rem 1.75rem;
+      flex-direction: column;
+    }
+    .mobile-menu.open { display: flex; animation: mobileMenuIn 0.2s ease; }
+    @keyframes mobileMenuIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .mobile-menu-link {
+      display: block;
+      padding: 1rem 0;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text2);
+      border-bottom: 1px solid var(--border);
+      transition: color 0.2s;
+    }
+    .mobile-menu-link:hover { color: var(--text); }
+    .mobile-menu-link:last-of-type { border-bottom: none; }
+    .mobile-menu-cta {
+      display: block;
+      margin-top: 1.25rem;
+      padding: 0.9rem;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      background: var(--gold);
+      color: #000;
+      border-radius: 8px;
+      letter-spacing: 0.01em;
+      transition: background 0.2s;
+    }
+    .mobile-menu-cta:hover { background: #ffb733; }
+
+    /* =====================
+       ENHANCED HOVER STATES
+    ===================== */
+    .one-scan-card:hover {
+      box-shadow: 0 0 0 1px rgba(232,160,32,0.2), 0 12px 48px rgba(0,0,0,0.3);
+    }
+    .demo-card:hover {
+      box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(232,160,32,0.15), 0 0 30px rgba(232,160,32,0.05);
+    }
+    .workbook-card:hover {
+      box-shadow: 0 8px 32px rgba(232,160,32,0.12);
+    }
+    .stat-item {
+      transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+      cursor: default;
+    }
+    .stat-item:hover { transform: translateY(-4px); }
+    .stat-num { transition: color 0.3s; }
+    .stat-item:hover .stat-num { color: #ffb733; }
+    .how-step { transition: background 0.25s; }
+    .how-step:hover { background: var(--surface); }
+    .how-step:hover .how-step-num {
+      color: rgba(232,160,32,0.22);
+      transition: color 0.3s;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="scroll-progress" id="scroll-progress"></div>
+
+  <!-- ===== NAV ===== -->
+  <nav class="nav" id="site-nav">
+    <div class="nav-inner">
+      <a href="#top" class="nav-brand">
+        <span class="nav-brand-ng">NextGen AI</span>
+      </a>
+      <div class="nav-links">
+        <a href="#how-it-works" class="nav-link">How It Works</a>
+        <a href="#roi-calc" class="nav-link">Calculators</a>
+        <a href="#demos" class="nav-link">Demos</a>
+        <a href="#behind-the-tech" class="nav-link">Text Lookup</a>
+        <a href="mailto:Michaelcareyai@gmail.com" class="nav-cta">Book a Demo</a>
+      </div>
+      <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobile-menu" role="dialog" aria-label="Navigation">
+    <a href="#how-it-works" class="mobile-menu-link">How It Works</a>
+    <a href="#how-it-works" class="mobile-menu-link">How It Works</a>
+    <a href="#roi-calc" class="mobile-menu-link">ROI Calculator</a>
+    <a href="#demos" class="mobile-menu-link">Demos</a>
+    <a href="#behind-the-tech" class="mobile-menu-link">Text Lookup</a>
+    <a href="#compare" class="mobile-menu-link">Compare</a>
+    <a href="mailto:Michaelcareyai@gmail.com" class="mobile-menu-cta">Book a Demo →</a>
+  </div>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" id="top">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="hero-badge">Now live with Indiana contractors</div>
+          <h1 class="hero-headline">
+            One scan.<br><em>Clean request.</em><br>Shop notified.
+          </h1>
+          <p class="hero-tagline">Save time and money with QR and text message workflows built for field operations</p>
+          <p class="hero-sub">
+            From service requests and inspections to transport requests and daily field updates, crews can submit what they need in under a minute without another app.
+          </p>
+          <div class="hero-actions">
+            <a href="mailto:Michaelcareyai@gmail.com" class="btn-primary">Book a 12-Minute Demo →</a>
+            <a href="#roi-calc" class="btn-secondary">See My ROI</a>
+          </div>
+          <div class="hero-trust">
+            <span>✓ No app download</span>
+            <span class="hero-trust-sep">·</span>
+            <span>✓ Works on any phone</span>
+            <span class="hero-trust-sep">·</span>
+            <span>✓ Fast rollout</span>
+          </div>
+        </div>
+
+        <div class="hero-showcase" data-hero-showcase>
+          <div class="hero-tabs" role="tablist" aria-label="Automation systems">
+            <button type="button" class="hero-tab is-active" role="tab" id="htab-0" aria-selected="true" aria-controls="hpanel-0" tabindex="0">QR Scan</button>
+            <button type="button" class="hero-tab" role="tab" id="htab-1" aria-selected="false" aria-controls="hpanel-1" tabindex="-1">Dispatch</button>
+            <button type="button" class="hero-tab" role="tab" id="htab-2" aria-selected="false" aria-controls="hpanel-2" tabindex="-1">Service</button>
+            <button type="button" class="hero-tab" role="tab" id="htab-3" aria-selected="false" aria-controls="hpanel-3" tabindex="-1">Daily Log</button>
+          </div>
+          <div class="hero-panels">
+            <!-- Panel 0: QR Scan -->
+            <div class="hero-panel is-active" id="hpanel-0" role="tabpanel" aria-labelledby="htab-0">
+              <div class="hero-mock-header">
+                <span class="hero-mock-badge">Field scan</span>
+                <span class="hero-mock-id">EX-12 · CAT 336</span>
+              </div>
+              <p class="hero-mock-title">DOT pre-trip · Shift start</p>
+              <ul class="hero-mock-checklist">
+                <li><span class="hero-mock-check"></span> Fluids &amp; leaks</li>
+                <li><span class="hero-mock-check hero-mock-check--fail"></span> Hydraulic line — photo required</li>
+                <li><span class="hero-mock-check"></span> Tires &amp; glass</li>
+              </ul>
+              <div class="hero-mock-footer">Synced to asset record · Shop notified automatically</div>
+              <ul class="hero-panel-bullets">
+                <li>One QR ties inspections to serial number — no wrong packet on the hood.</li>
+                <li>Pass/fail, photos, and notes flow into a single maintenance thread.</li>
+              </ul>
+            </div>
+
+            <!-- Panel 1: Dispatch -->
+            <div class="hero-panel" id="hpanel-1" role="tabpanel" aria-labelledby="htab-1">
+              <div class="hero-mock--dispatch">
+                <div class="hero-mock-map">
+                  <svg viewBox="0 0 200 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="200" height="110" rx="8" fill="rgba(15,23,42,0.8)"/>
+                    <path d="M20 85 Q60 30 100 55 T180 35" stroke="rgba(232,160,32,0.3)" stroke-width="2" stroke-dasharray="4 3" fill="none"/>
+                    <circle cx="28" cy="83" r="5" fill="#E8A020"/>
+                    <circle cx="100" cy="53" r="4" fill="rgba(232,160,32,0.4)"/>
+                    <circle cx="176" cy="37" r="5" fill="#22C55E"/>
+                    <text x="33" y="87" fill="rgba(232,160,32,0.8)" font-size="7" font-family="sans-serif">Site 3</text>
+                    <text x="158" y="31" fill="rgba(34,197,94,0.9)" font-size="7" font-family="sans-serif">Site 7</text>
+                  </svg>
+                </div>
+                <div class="hero-mock-dispatch-list">
+                  <div class="hero-mock-row"><span class="hero-mock-tag">Live</span> MV-402 · Lowboy → Site 7</div>
+                  <div class="hero-mock-row"><span class="hero-mock-tag hero-mock-tag--muted">Queued</span> MV-403 · Yard pickup</div>
+                </div>
+                <ul class="hero-panel-bullets">
+                  <li>Request → assign → complete in one lane — less radio churn and idle iron.</li>
+                  <li>Dispatch sees moves in context of job site and asset priority.</li>
+                </ul>
+              </div>
+            </div>
+
+
+
+            <!-- Panel 2: Service Request -->
+            <div class="hero-panel" id="hpanel-2" role="tabpanel" aria-labelledby="htab-2">
+              <div class="hero-mock-header">
+                <span class="hero-mock-badge">Service request</span>
+                <span class="hero-mock-id">SK-07 · Bobcat S650</span>
+              </div>
+              <p class="hero-mock-title">Hydraulic leak — left boom cylinder</p>
+              <div class="hero-mock-dispatch-list">
+                <div class="hero-mock-row"><span class="hero-mock-tag">Open</span> Submitted by J. Torres · 7:42 AM</div>
+                <div class="hero-mock-row"><span class="hero-mock-tag hero-mock-tag--muted">Photo</span> IMG_4421.jpg attached</div>
+                <div class="hero-mock-row"><span class="hero-mock-tag">Shop</span> Assigned to Mike · parts staged</div>
+              </div>
+              <ul class="hero-panel-bullets">
+                <li>Request lands in the shop queue instantly — no phone tag, no lost texts.</li>
+                <li>Asset ID and photo arrive together so the tech can prep before the unit rolls in.</li>
+              </ul>
+            </div>
+
+            <!-- Panel 3: Daily Log -->
+            <div class="hero-panel" id="hpanel-3" role="tabpanel" aria-labelledby="htab-3">
+              <div class="hero-mock-header">
+                <span class="hero-mock-badge">Daily log</span>
+                <span class="hero-mock-id">EX-09 · Komatsu PC290</span>
+              </div>
+              <p class="hero-mock-title">End-of-shift · Operator sign-off</p>
+              <ul class="hero-mock-checklist">
+                <li><span class="hero-mock-check"></span> Hours logged — 9.5 hrs</li>
+                <li><span class="hero-mock-check"></span> No new damage reported</li>
+                <li><span class="hero-mock-check"></span> Fuel topped off at yard</li>
+              </ul>
+              <div class="hero-mock-footer">Logged 4:51 PM · Tied to asset record</div>
+              <ul class="hero-panel-bullets">
+                <li>Operators close out the shift in under 30 seconds — no paper, no office stop.</li>
+                <li>Hours, fuel, and notes stay on the machine record for service planning.</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== STATS BAR ===== -->
+  <!-- ===== HOW IT WORKS ===== -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">How It Works</p>
+        <h2 class="section-headline">Three steps.</h2>
+        <p class="section-sub">No app to download. No training required. Crews scan the QR code on the machine and submit — the office and shop see it immediately.</p>
+      </div>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-step-num">01</div>
+          <span class="how-step-tag">Field</span>
+          <h3 class="how-step-title">Scan the QR on the Machine</h3>
+          <p class="how-step-body">Crew scans from any smartphone — no app download, no login. The form opens instantly, pre-loaded with the asset ID.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-step-num">02</div>
+          <span class="how-step-tag">Crew</span>
+          <h3 class="how-step-title">Submit the Request with Photos</h3>
+          <p class="how-step-body">Select the request type — maintenance, transport, inspection, or daily log. Add required photos and a description. Hit submit. Done in under a minute.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-step-num">03</div>
+          <span class="how-step-tag">Office + Shop</span>
+          <h3 class="how-step-title">One Queue. Tracked Status.</h3>
+          <p class="how-step-body">Everything lands in a single dashboard for the office and shop. Asset ID, location, photos, and status tracking — all in one place. Can connect to your existing software.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats-bar">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-num">&lt;60s</div>
+          <div class="stat-label">Scan to submitted request</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">Faster reporting</div>
+          <div class="stat-label">Than calls, texts, or paper</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">No app</div>
+          <div class="stat-label">Works on any phone</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">Less missed info</div>
+          <div class="stat-label">Standardized field requests</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===== ROI CALCULATOR ===== -->
+  <section class="roi-section" id="roi-calc">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">Calculators</p>
+        <h2 class="section-headline">What's your fleet leaving on the table?</h2>
+        <p class="section-sub">Pick a workflow and enter your numbers. Conservative math — transparent enough to check yourself.</p>
+        <p class="roi-disclaimer roi-disclaimer-section">All calculator outputs are illustrative estimates for discussion only. They are not guarantees of savings, performance, or outcomes, and are not financial or legal advice. Your actual results will vary.</p>
+      </div>
+
+      <div class="wcalc-tabs" role="tablist">
+        <button class="wcalc-tab is-active" role="tab" data-wcalc="fleet-overview">Fleet Overview</button>
+        <button class="wcalc-tab" role="tab" data-wcalc="inspections">Daily Inspections</button>
+        <button class="wcalc-tab" role="tab" data-wcalc="service">Service Requests</button>
+        <button class="wcalc-tab" role="tab" data-wcalc="transport">Transport Requests</button>
+      </div>
+
+      <!-- ---- FLEET OVERVIEW ---- -->
+      <div class="wcalc-panel is-active" id="wcalc-fleet-overview">
+        <p class="wcalc-description">Model direct labor recovery from digital inspections plus uptime gains from fewer major repairs. Conservative floor and growth upside — transparent math.</p>
+        <div class="roi-grid">
+        <div class="roi-inputs-card">
+          <p class="roi-inputs-title">Your Fleet Details</p>
+          <div class="slider-group">
+            <label for="fleet-size" class="slider-label">
+              <span>Fleet Size (units)</span>
+              <div class="slider-val-wrap">
+                <input type="number" id="fleet-size-input" min="1" max="500" value="50" class="number-input">
+              </div>
+            </label>
+            <input type="range" id="fleet-size" min="1" max="500" value="50" class="slider">
+          </div>
+          <div class="slider-group">
+            <label for="weekly-inspections" class="slider-label">
+              <span>Weekly Inspections (per asset)</span>
+              <div class="slider-val-wrap">
+                <input type="number" id="weekly-inspections-input" min="0" max="14" value="1" step="0.25" class="number-input">
+              </div>
+            </label>
+            <input type="range" id="weekly-inspections" min="0" max="14" value="1" step="0.25" class="slider">
+          </div>
+          <div class="slider-group">
+            <label for="shop-rate" class="slider-label">
+              <span>Shop Hourly Rate (Loaded)</span>
+              <div class="slider-val-wrap">
+                <span class="slider-currency">$</span>
+                <input type="number" id="shop-rate-input" min="25" max="200" value="50" class="number-input">
+              </div>
+            </label>
+            <input type="range" id="shop-rate" min="25" max="200" value="50" class="slider">
+          </div>
+          <div class="slider-group">
+            <label for="incidents" class="slider-label">
+              <span>Prevented Breakdowns (per unit / yr)</span>
+              <div class="slider-val-wrap">
+                <input type="number" id="incidents-input" min="0.25" max="4" value="1" step="0.25" class="number-input">
+              </div>
+            </label>
+            <input type="range" id="incidents" min="0.25" max="4" value="1" step="0.25" class="slider">
+          </div>
+        </div>
+
+        <div class="roi-result-card" aria-live="polite">
+          <p class="roi-kicker">Recoverable Annual Impact</p>
+          <p class="roi-total" id="roi-recoverable-total">$0</p>
+          <p class="roi-total-label">Total modeled recovery</p>
+          <div class="roi-breakdown">
+            <div class="roi-line">
+              <div class="roi-line-left">
+                <span class="roi-line-name">Floor · safe baseline</span>
+                <span class="roi-line-hint">Direct labor reclaim · 12 min/report vs. paper</span>
+              </div>
+              <span class="roi-line-val roi-gold" id="roi-floor-amount">$0</span>
+            </div>
+            <div class="roi-line">
+              <div class="roi-line-left">
+                <span class="roi-line-name">Upside · growth</span>
+                <span class="roi-line-hint">8 shop hrs per prevented breakdown · tunable above</span>
+              </div>
+              <span class="roi-line-val roi-green" id="roi-upside-amount">$0</span>
+            </div>
+          </div>
+          <p class="roi-note">Each line applies a $35 conservative trim so totals are not overstated. Actual results scale with fleet utilization and adoption. Estimates are for demonstration purposes only and may not reflect actual results.</p>
+          <p class="roi-disclaimer">Illustrative estimates only—not guaranteed savings or outcomes.</p>
+        </div>
+      </div>
+      </div>
+
+      <!-- ---- INSPECTIONS ---- -->
+      <div class="wcalc-panel" id="wcalc-inspections">
+        <p class="wcalc-description">Paper inspections cost 10 minutes per machine per day — filling the form, walking it to the trailer, someone re-entering it in the office. Digital brings that to under a minute. Operator and manager time both count.</p>
+        <div class="roi-grid">
+          <div class="roi-inputs-card">
+            <p class="roi-inputs-title">Your Numbers</p>
+            <div class="slider-group">
+              <label class="slider-label"><span>Fleet Size (machines)</span>
+                <div class="slider-val-wrap"><input type="number" id="wi-fleet-input" min="1" max="500" value="50" class="number-input"></div>
+              </label>
+              <input type="range" id="wi-fleet" min="1" max="500" value="50" class="slider">
+            </div>
+            <div class="slider-group">
+              <label class="slider-label"><span>Working Days / Year</span>
+                <div class="slider-val-wrap"><input type="number" id="wi-days-input" min="50" max="365" value="250" class="number-input"></div>
+              </label>
+              <input type="range" id="wi-days" min="50" max="365" value="250" class="slider">
+            </div>
+            <div class="slider-group">
+              <label class="slider-label"><span>Operator Rate ($/hr)</span>
+                <div class="slider-val-wrap"><span class="slider-currency">$</span><input type="number" id="wi-oprate-input" min="15" max="75" value="28" class="number-input"></div>
+              </label>
+              <input type="range" id="wi-oprate" min="15" max="75" value="28" class="slider">
+            </div>
+            <div class="slider-group">
+              <label class="slider-label"><span>Manager Rate ($/hr)</span>
+                <div class="slider-val-wrap"><span class="slider-currency">$</span><input type="number" id="wi-mgrrate-input" min="15" max="100" value="35" class="number-input"></div>
+              </label>
+              <input type="range" id="wi-mgrrate" min="15" max="100" value="35" class="slider">
+            </div>
+          </div>
+          <div class="roi-result-card" aria-live="polite">
+            <p class="roi-kicker">Annual Time Savings</p>
+            <p class="roi-total" id="wi-total">$0</p>
+            <p class="roi-total-label">combined operator + manager</p>
+            <div class="wcalc-breakdown">
+              <div class="wcalc-breakdown-row"><span class="wcalc-breakdown-label">Operator · 10 min/machine/day</span><span class="wcalc-breakdown-val" id="wi-op-val">$0</span></div>
+              <div class="wcalc-breakdown-row"><span class="wcalc-breakdown-label">Manager · 2 min/machine/day</span><span class="wcalc-breakdown-val" id="wi-mgr-val">$0</span></div>
+            </div>
+            <p class="roi-note">Based on 10 min operator + 2 min manager saved per machine per day vs. paper.</p>
+            <p class="roi-disclaimer">Illustrative estimates only—not guaranteed savings or outcomes.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---- SERVICE REQUESTS ---- -->
+      <div class="wcalc-panel" id="wcalc-service">
+        <p class="wcalc-description">A phone or text service request takes 15 minutes of back-and-forth to get all the information to the shop. A QR request arrives complete in under a minute. You save 14 minutes of manager time and 5 minutes of crew time per request.</p>
+        <div class="roi-grid">
+          <div class="roi-inputs-card">
+            <p class="roi-inputs-title">Your Numbers</p>
+            <div class="slider-group">
+              <label class="slider-label"><span>Requests / Week</span>
+                <div class="slider-val-wrap"><input type="number" id="ws-vol-input" min="1" max="200" value="25" class="number-input"></div>
+              </label>
+              <input type="range" id="ws-vol" min="1" max="200" value="25" class="slider">
+            </div>
+            <div class="slider-group">
+              <label class="slider-label"><span>Manager Rate ($/hr)</span>
+                <div class="slider-val-wrap"><span class="slider-currency">$</span><input type="number" id="ws-mgrrate-input" min="15" max="100" value="35" class="number-input"></div>
+              </label>
+              <input type="range" id="ws-mgrrate" min="15" max="100" value="35" class="slider">
+            </div>
+            <div class="slider-group">
+              <label class="slider-label"><span>Crew Rate ($/hr)</span>
+                <div class="slider-val-wrap"><span class="slider-currency">$</span><input type="number" id="ws-crewrate-input" min="15" max="75" value="28" class="number-input"></div>
+              </label>
+              <input type="range" id="ws-crewrate" min="15" max="75" value="28" class="slider">
+            </div>
+          </div>
+          <div class="roi-result-card" aria-live="polite">
+            <p class="roi-kicker">Annual Time Savings</p>
+            <p class="roi-total" id="ws-total">$0</p>
+            <p class="roi-total-label">combined manager + crew</p>
+            <div class="wcalc-breakdown">
+              <div class="wcalc-breakdown-row"><span class="wcalc-breakdown-label">Manager · 14 min saved/request</span><span class="wcalc-breakdown-val" id="ws-mgr-val">$0</span></div>
+              <div class="wcalc-breakdown-row"><span class="wcalc-breakdown-label">Crew · 5 min saved/request</span><span class="wcalc-breakdown-val" id="ws-crew-val">$0</span></div>
+            </div>
+            <p class="roi-note">Based on 15-min phone/text process vs. 1-min QR request. 14 min manager + 5 min crew saved per request.</p>
+            <p class="roi-disclaimer">Illustrative estimates only—not guaranteed savings or outcomes.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---- TRANSPORT ---- -->
+      <div class="wcalc-panel" id="wcalc-transport">
+        <p class="wcalc-description">Manual move coordination takes 20 minutes of phone tag to get the right information to the right people. A QR transport request arrives complete. You save 18 minutes of dispatcher time and 7 minutes of crew time per move.</p>
+        <div class="roi-grid">
+          <div class="roi-inputs-card">
+            <p class="roi-inputs-title">Your Numbers</p>
+            <div class="slider-group">
+              <label class="slider-label"><span>Moves / Week</span>
+                <div class="slider-val-wrap"><input type="number" id="wt-vol-input" min="1" max="100" value="10" class="number-input"></div>
+              </label>
+              <input type="range" id="wt-vol" min="1" max="100" value="10" class="slider">
+            </div>
+            <div class="slider-group">
+              <label class="slider-label"><span>Dispatcher Rate ($/hr)</span>
+                <div class="slider-val-wrap"><span class="slider-currency">$</span><input type="number" id="wt-disprate-input" min="15" max="100" value="35" class="number-input"></div>
+              </label>
+              <input type="range" id="wt-disprate" min="15" max="100" value="35" class="slider">
+            </div>
+            <div class="slider-group">
+              <label class="slider-label"><span>Crew Rate ($/hr)</span>
+                <div class="slider-val-wrap"><span class="slider-currency">$</span><input type="number" id="wt-crewrate-input" min="15" max="75" value="28" class="number-input"></div>
+              </label>
+              <input type="range" id="wt-crewrate" min="15" max="75" value="28" class="slider">
+            </div>
+          </div>
+          <div class="roi-result-card" aria-live="polite">
+            <p class="roi-kicker">Annual Time Savings</p>
+            <p class="roi-total" id="wt-total">$0</p>
+            <p class="roi-total-label">combined dispatcher + crew</p>
+            <div class="wcalc-breakdown">
+              <div class="wcalc-breakdown-row"><span class="wcalc-breakdown-label">Dispatcher · 18 min saved/move</span><span class="wcalc-breakdown-val" id="wt-disp-val">$0</span></div>
+              <div class="wcalc-breakdown-row"><span class="wcalc-breakdown-label">Crew · 7 min saved/move</span><span class="wcalc-breakdown-val" id="wt-crew-val">$0</span></div>
+            </div>
+            <p class="roi-note">Based on 20-min phone coordination vs. 2-min QR request. 18 min dispatcher + 7 min crew saved per move.</p>
+            <p class="roi-disclaimer">Illustrative estimates only—not guaranteed savings or outcomes.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== DEMOS ===== -->
+  <section class="demos" id="demos">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">Interactive Demos</p>
+        <h2 class="section-headline">Try it before you commit.</h2>
+        <p class="section-sub">Live prototypes across every workflow. Open any of these on your phone right now and see exactly what your crew would see.</p>
+      </div>
+      <div class="demos-grid">
+        <!-- Ops Command -->
+        <div class="demo-card">
+          <div class="demo-icon-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          </div>
+          <h3 class="demo-card-title">Ops Command</h3>
+          <p class="demo-card-sub">Asset tracking, scheduling &amp; crew dispatch — one dashboard</p>
+          <ul class="demo-checklist">
+            <li>Real-time inventory</li>
+            <li>Broken tool history</li>
+            <li>Usage analytics</li>
+            <li>Drag-and-drop scheduling</li>
+            <li>Live job stages</li>
+            <li>iPad compatible</li>
+          </ul>
+          <a href="https://michaelai1.github.io/nextgen-ops-dashboard/" class="demo-btn" target="_blank" rel="noopener">Try Live Demo</a>
+        </div>
+        <!-- QR Code Access -->
+        <div class="demo-card">
+          <div class="demo-icon-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <h3 class="demo-card-title">QR Code Access</h3>
+          <p class="demo-card-sub">One QR code on any piece of equipment. Crews scan and submit maintenance requests, transport moves, inspections, and daily logs in under 60 seconds.</p>
+          <ul class="demo-checklist">
+            <li>No app download or login required</li>
+            <li>Submissions include photo, location, and timestamp</li>
+            <li>Everything lands in one queue for the office</li>
+          </ul>
+          <a href="https://michaelai1.github.io/equipment-qr-demo/" class="demo-btn" target="_blank" rel="noopener">Try Live Demo</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== PHONE / TEXT ===== -->
+  <section class="phone-section" id="behind-the-tech">
+    <div class="container">
+      <div class="phone-grid">
+        <div class="phone-text">
+          <p class="section-eyebrow phone-text-eyebrow">No-App Commands</p>
+          <h2>Text lookup for<br>the <em>yard &amp; shop.</em></h2>
+          <p>Text-based lookup still matters for tools and quick answers. It sits alongside inspections and maintenance — not in front of the business case. Crews already know how to text.</p>
+          <a href="mailto:Michaelcareyai@gmail.com" class="btn-primary">Contact Sales →</a>
+        </div>
+        <div class="iphone-wrap">
+          <div class="iphone-glow"></div>
+          <div class="iphone">
+            <div class="iphone-notch"></div>
+            <div class="iphone-screen">
+              <div class="iphone-statusbar">
+                <span class="iphone-statusbar-time">9:41</span>
+                <span>●●●</span>
+              </div>
+              <div class="messages-area" id="messages-container"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA BANNER ===== -->
+  <section class="cta-banner">
+    <div class="container">
+      <div class="cta-inner">
+        <div class="cta-proof">Live with Indiana contractors</div>
+        <h2>Your shop shouldn't find out<br>about breakdowns from a <em>phone call.</em></h2>
+        <div class="cta-actions">
+          <a href="mailto:Michaelcareyai@gmail.com" class="btn-primary">Book a 12-Minute Demo →</a>
+          <a href="tel:3172002112" class="btn-secondary">Call 317-200-2112</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div>
+          <p class="footer-brand">NextGen AI</p>
+
+          <p class="footer-contact">
+            Michael Carey · NextGen AI LLC<br>
+            Bloomington, Indiana<br>
+            <a href="tel:3172002112">317-200-2112</a> · <a href="mailto:Michaelcareyai@gmail.com">Michaelcareyai@gmail.com</a>
+          </p>
+        </div>
+        <div>
+          <p class="footer-col-title">Product</p>
+          <ul class="footer-links">
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#roi-calc">ROI Calculator</a></li>
+            <li><a href="#demos">Live Demos</a></li>
+            <li><a href="toolguard_roi_dual.html">ROI Workbooks</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="footer-col-title">Workflows</p>
+          <ul class="footer-links">
+            <li><a href="toolguard_roi_equipment_inspections.html">Equipment Inspections</a></li>
+            <li><a href="toolguard_roi_service_requests.html">Service Requests</a></li>
+            <li><a href="toolguard_roi_transport_requests.html">Transport Requests</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 NextGen AI LLC. All rights reserved.</span>
+        <span>Built for excavation · utilities · concrete · commercial construction</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== SCRIPTS ===== -->
+  <!-- Nav scroll -->
+  <script>
+    (function(){
+      var nav = document.getElementById('site-nav');
+      function onScroll(){ nav && nav.classList.toggle('nav--scrolled', window.scrollY > 32); }
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+    })();
+  </script>
+
+  <!-- Hero tabs -->
+  <script>
+    (function(){
+      var root = document.querySelector('[data-hero-showcase]');
+      if (!root) return;
+      var tabs   = root.querySelectorAll('[role="tab"]');
+      var panels = root.querySelectorAll('[role="tabpanel"]');
+      function activate(i){
+        tabs.forEach(function(t,idx){
+          var on = idx===i;
+          t.classList.toggle('is-active', on);
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+          t.setAttribute('tabindex', on ? '0' : '-1');
+        });
+        panels.forEach(function(p,idx){
+          var on = idx===i;
+          p.classList.toggle('is-active', on);
+          p.setAttribute('aria-hidden', on ? 'false' : 'true');
+        });
+      }
+      tabs.forEach(function(tab,i){
+        tab.addEventListener('click', function(){ activate(i); });
+        tab.addEventListener('keydown', function(e){
+          var n=i;
+          if(e.key==='ArrowRight'||e.key==='ArrowDown') n=(i+1)%tabs.length;
+          else if(e.key==='ArrowLeft'||e.key==='ArrowUp') n=(i-1+tabs.length)%tabs.length;
+          else if(e.key==='Home') n=0;
+          else if(e.key==='End') n=tabs.length-1;
+          else return;
+          e.preventDefault(); tabs[n].focus(); activate(n);
+        });
+      });
+    })();
+  </script>
+
+  <!-- ROI Calculator -->
+  <script>
+    (function(){
+      var fleetSlider  = document.getElementById('fleet-size');
+      var weeklySlider = document.getElementById('weekly-inspections');
+      var shopSlider   = document.getElementById('shop-rate');
+      var fleetInput   = document.getElementById('fleet-size-input');
+      var weeklyInput  = document.getElementById('weekly-inspections-input');
+      var shopInput    = document.getElementById('shop-rate-input');
+      var floorEl      = document.getElementById('roi-floor-amount');
+      var upsideEl     = document.getElementById('roi-upside-amount');
+      var totalEl      = document.getElementById('roi-recoverable-total');
+      if (!fleetSlider || !floorEl) return;
+
+      var CONSERVATIVE_TRIM = 35;
+      var ADMIN_MIN_PER_REPORT = 12 / 60;
+      var SHOP_HOURS_PER_INCIDENT = 8;
+
+      var incidentSlider = document.getElementById('incidents');
+      var incidentInput  = document.getElementById('incidents-input');
+
+      function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US', { maximumFractionDigits: 0 }); }
+      function trim(raw){ return Math.max(0, Math.round(raw) - CONSERVATIVE_TRIM); }
+
+      function calc(){
+        var fleet     = Math.min(500, Math.max(1,    parseInt(fleetSlider.value, 10)    || 1));
+        var weekly    = Math.min(14,  Math.max(0,    parseFloat(weeklySlider.value)      || 0));
+        var shop      = Math.min(200, Math.max(25,   parseFloat(shopSlider.value)        || 25));
+        var incidents = Math.min(4,   Math.max(0.25, parseFloat(incidentSlider.value)    || 1));
+        var reports   = fleet * weekly * 52;
+        var floor     = trim(reports * ADMIN_MIN_PER_REPORT * shop);
+        var upside    = trim(fleet * incidents * SHOP_HOURS_PER_INCIDENT * shop);
+        floorEl.textContent  = fmt(floor);
+        upsideEl.textContent = fmt(upside);
+        totalEl.textContent  = fmt(floor + upside);
+      }
+
+      function bindInt(sl, inp, min, max){
+        sl.addEventListener('input', function(){ inp.value = this.value; calc(); });
+        inp.addEventListener('input', function(){
+          var v = Math.min(max, Math.max(min, parseInt(this.value,10)||min));
+          inp.value = v; sl.value = v; calc();
+        });
+      }
+      function bindFloat(sl, inp, min, max, step){
+        function rs(v){ return Math.round(v/step)*step; }
+        sl.addEventListener('input', function(){ var v=rs(parseFloat(this.value)); inp.value=v; sl.value=v; calc(); });
+        inp.addEventListener('input', function(){
+          var v=Math.min(max,Math.max(min,rs(parseFloat(this.value)||min)));
+          inp.value=v; sl.value=v; calc();
+        });
+      }
+
+      bindInt(fleetSlider, fleetInput, 1, 500);
+      bindFloat(weeklySlider, weeklyInput, 0, 14, 0.25);
+      bindFloat(shopSlider, shopInput, 25, 200, 1);
+      bindFloat(incidentSlider, incidentInput, 0.25, 4, 0.25);
+      calc();
+    })();
+  </script>
+
+  <!-- Phone message animation -->
+  <script>
+    (function(){
+      var container = document.getElementById('messages-container');
+      if (!container) return;
+      var msgs = [
+        { from: 'user', text: 'Where is the 20ft ladder?',                   delay: 500  },
+        { from: 'typing',                                                      delay: 1400 },
+        { from: 'bot',  text: 'The 20ft Ladder is at the Shop.',              delay: 2200 },
+        { from: 'user', text: 'Who has the skid steer?',                      delay: 3600 },
+        { from: 'typing',                                                      delay: 4500 },
+        { from: 'bot',  text: 'Crew 1 scanned the Skid Steer at The Vue Apts (2 hrs ago).', delay: 5400 }
+      ];
+      function addMsg(from, text){
+        var div = document.createElement('div');
+        div.className = 'msg ' + from;
+        if (from === 'typing'){
+          div.innerHTML = '<div class="bubble typing-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>';
+        } else {
+          div.innerHTML = '<div class="bubble">' + text + '</div>';
+        }
+        div.style.cssText = 'opacity:0;transform:translateY(8px);transition:all 0.3s ease';
+        container.appendChild(div);
+        requestAnimationFrame(function(){
+          div.style.opacity = '1';
+          div.style.transform = 'translateY(0)';
+        });
+        container.scrollTop = container.scrollHeight;
+      }
+      msgs.forEach(function(m){
+        setTimeout(function(){
+          if (m.from === 'typing'){
+            addMsg('typing');
+          } else {
+            var typing = container.querySelector('.typing-bubble');
+            if (typing){
+              typing.parentElement.style.opacity = '0';
+              setTimeout(function(){
+                if (typing.parentElement) typing.parentElement.remove();
+                addMsg(m.from, m.text);
+              }, 250);
+            } else {
+              addMsg(m.from, m.text);
+            }
+          }
+        }, m.delay);
+      });
+    })();
+  </script>
+
+  <!-- Workflow Calculators -->
+  <script>
+    (function(){
+      // Tab switching
+      var tabs   = document.querySelectorAll('.wcalc-tab');
+      var panels = document.querySelectorAll('.wcalc-panel');
+      tabs.forEach(function(tab){
+        tab.addEventListener('click', function(){
+          var id = 'wcalc-' + tab.dataset.wcalc;
+          tabs.forEach(function(t){ t.classList.remove('is-active'); });
+          panels.forEach(function(p){ p.classList.remove('is-active'); });
+          tab.classList.add('is-active');
+          document.getElementById(id).classList.add('is-active');
+        });
+      });
+
+      function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
+      function bind(slId, inId, min, max, step, cb){
+        var sl = document.getElementById(slId);
+        var inp = document.getElementById(inId);
+        if (!sl || !inp) return;
+        function rs(v){ return step ? Math.round(v/step)*step : v; }
+        sl.addEventListener('input', function(){ inp.value = rs(parseFloat(this.value)); cb(); });
+        inp.addEventListener('input', function(){
+          var v = Math.min(max, Math.max(min, rs(parseFloat(this.value)||min)));
+          inp.value = v; sl.value = v; cb();
+        });
+      }
+
+      // INSPECTIONS
+      function calcInspections(){
+        var fleet   = parseFloat(document.getElementById('wi-fleet').value)   || 50;
+        var days    = parseFloat(document.getElementById('wi-days').value)    || 250;
+        var oprate  = parseFloat(document.getElementById('wi-oprate').value)  || 28;
+        var mgrrate = parseFloat(document.getElementById('wi-mgrrate').value) || 35;
+        var op  = fleet * (10/60) * oprate  * days;
+        var mgr = fleet * (2/60)  * mgrrate * days;
+        document.getElementById('wi-op-val').textContent  = fmt(op);
+        document.getElementById('wi-mgr-val').textContent = fmt(mgr);
+        document.getElementById('wi-total').textContent   = fmt(op + mgr);
+      }
+      bind('wi-fleet','wi-fleet-input',1,500,1,calcInspections);
+      bind('wi-days','wi-days-input',50,365,1,calcInspections);
+      bind('wi-oprate','wi-oprate-input',15,75,1,calcInspections);
+      bind('wi-mgrrate','wi-mgrrate-input',15,100,1,calcInspections);
+      calcInspections();
+
+      // SERVICE REQUESTS
+      function calcService(){
+        var vol      = parseFloat(document.getElementById('ws-vol').value)      || 25;
+        var mgrrate  = parseFloat(document.getElementById('ws-mgrrate').value)  || 35;
+        var crewrate = parseFloat(document.getElementById('ws-crewrate').value) || 28;
+        var mgr  = (14/60) * mgrrate  * vol * 52;
+        var crew = (5/60)  * crewrate * vol * 52;
+        document.getElementById('ws-mgr-val').textContent  = fmt(mgr);
+        document.getElementById('ws-crew-val').textContent = fmt(crew);
+        document.getElementById('ws-total').textContent    = fmt(mgr + crew);
+      }
+      bind('ws-vol','ws-vol-input',1,200,1,calcService);
+      bind('ws-mgrrate','ws-mgrrate-input',15,100,1,calcService);
+      bind('ws-crewrate','ws-crewrate-input',15,75,1,calcService);
+      calcService();
+
+      // TRANSPORT REQUESTS
+      function calcTransport(){
+        var vol       = parseFloat(document.getElementById('wt-vol').value)       || 10;
+        var disprate  = parseFloat(document.getElementById('wt-disprate').value)  || 35;
+        var crewrate  = parseFloat(document.getElementById('wt-crewrate').value)  || 28;
+        var disp = (18/60) * disprate  * vol * 52;
+        var crew = (7/60)  * crewrate * vol * 52;
+        document.getElementById('wt-disp-val').textContent = fmt(disp);
+        document.getElementById('wt-crew-val').textContent = fmt(crew);
+        document.getElementById('wt-total').textContent    = fmt(disp + crew);
+      }
+      bind('wt-vol','wt-vol-input',1,100,1,calcTransport);
+      bind('wt-disprate','wt-disprate-input',15,100,1,calcTransport);
+      bind('wt-crewrate','wt-crewrate-input',15,75,1,calcTransport);
+      calcTransport();
+    })();
+  </script>
+
+  <!-- Scroll progress bar -->
+  <script>
+    (function(){
+      var bar = document.getElementById('scroll-progress');
+      if (!bar) return;
+      function update(){
+        var scrollTop = window.scrollY;
+        var docH = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = docH > 0 ? (scrollTop / docH * 100) + '%' : '0%';
+      }
+      window.addEventListener('scroll', update, { passive: true });
+      update();
+    })();
+  </script>
+
+  <!-- Mobile nav -->
+  <script>
+    (function(){
+      var btn = document.getElementById('nav-hamburger');
+      var menu = document.getElementById('mobile-menu');
+      if (!btn || !menu) return;
+      function close(){
+        btn.classList.remove('open');
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+      btn.addEventListener('click', function(){
+        var opening = !menu.classList.contains('open');
+        btn.classList.toggle('open', opening);
+        menu.classList.toggle('open', opening);
+        btn.setAttribute('aria-expanded', opening ? 'true' : 'false');
+      });
+      menu.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', close); });
+      document.addEventListener('keydown', function(e){ if(e.key==='Escape') close(); });
+    })();
+  </script>
+
+  <!-- Scroll reveal -->
+  <script>
+    (function(){
+      if (!window.IntersectionObserver) return;
+
+      // Selectors + delay patterns
+      var groups = [
+        { sel: '.section-header',     delay: 0 },
+        { sel: '.how-step',           delay: 'stagger' },
+        { sel: '.stat-item',          delay: 'stagger' },
+        { sel: '.one-scan-card',      delay: 'stagger' },
+        { sel: '.demo-card',          delay: 'stagger' },
+        { sel: '.workbook-card',      delay: 'stagger' },
+        { sel: '.roi-inputs-card',    delay: 0 },
+        { sel: '.roi-result-card',    delay: 0.1 },
+        { sel: '.roi-workbooks',      delay: 0 },
+        { sel: '.phone-text',         delay: 0 },
+        { sel: '.iphone-wrap',        delay: 0.12 },
+        { sel: '.cta-inner',          delay: 0 },
+        { sel: '.one-scan-note',      delay: 0.15 },
+        { sel: '.comparison-table',   delay: 0 },
+      ];
+
+      var observer = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if (e.isIntersecting) {
+            e.target.classList.add('is-visible');
+            observer.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+      groups.forEach(function(g){
+        var els = document.querySelectorAll(g.sel);
+        els.forEach(function(el, i){
+          el.classList.add('reveal');
+          var d = g.delay === 'stagger' ? (i % 6) * 0.08 : (g.delay || 0);
+          if (d > 0) el.style.transitionDelay = d + 's';
+          observer.observe(el);
+        });
+      });
+    })();
+  </script>
+
+  <!-- Animated stat counters -->
+  <script>
+    (function(){
+      if (!window.IntersectionObserver) return;
+      var statsBar = document.querySelector('.stats-bar');
+      if (!statsBar) return;
+      var done = false;
+      var observer = new IntersectionObserver(function(entries){
+        if (!entries[0].isIntersecting || done) return;
+        done = true;
+        observer.disconnect();
+        var nums = statsBar.querySelectorAll('.stat-num');
+        nums.forEach(function(el){
+          var raw = el.textContent.trim();
+          // Parse: prefix/suffix and numeric value
+          var match = raw.match(/^([^0-9]*)([0-9]+)([^0-9]*)$/);
+          if (!match) return;
+          var prefix = match[1], num = parseInt(match[2], 10), suffix = match[3];
+          var start = 0, duration = 1400, startTime = null;
+          function easeOut(t){ return 1 - Math.pow(1-t, 3); }
+          function frame(ts){
+            if (!startTime) startTime = ts;
+            var p = Math.min((ts - startTime) / duration, 1);
+            var val = Math.round(easeOut(p) * num);
+            el.textContent = prefix + val + suffix;
+            if (p < 1) requestAnimationFrame(frame);
+          }
+          requestAnimationFrame(frame);
+        });
+      }, { threshold: 0.5 });
+      observer.observe(statsBar);
+    })();
+  </script>
+
+  <!-- Auto-rotating hero tabs -->
+  <script>
+    (function(){
+      var root = document.querySelector('[data-hero-showcase]');
+      if (!root) return;
+      var tabs = root.querySelectorAll('[role="tab"]');
+      if (!tabs.length) return;
+      var current = 0;
+      var interval = null;
+      var paused = false;
+
+      function activate(i){
+        // Delegate to existing tab click
+        tabs[i].click();
+        current = i;
+      }
+      function next(){ activate((current + 1) % tabs.length); }
+      function start(){ if (!interval) interval = setInterval(next, 4200); }
+      function pause(){ paused = true; clearInterval(interval); interval = null; }
+      function resume(){ if (!paused) return; paused = false; start(); }
+
+      root.addEventListener('mouseenter', pause);
+      root.addEventListener('mouseleave', function(){ paused = false; start(); });
+      root.addEventListener('focusin', pause);
+      root.addEventListener('focusout', function(e){
+        if (!root.contains(e.relatedTarget)) { paused = false; start(); }
+      });
+      // Stop auto-rotate on manual click
+      tabs.forEach(function(tab, i){
+        tab.addEventListener('click', function(){
+          current = i;
+          pause();
+          setTimeout(function(){ paused = false; start(); }, 8000); // resume after 8s
+        });
+      });
+
+      // Start after a short delay so the page has settled
+      setTimeout(start, 2500);
+    })();
+  </script>
+
+</body>
+</html>
